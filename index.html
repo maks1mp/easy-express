@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <fieldset>
+        <legend>Create New User</legend>
+        <form action="" id="new-user">
+            <input type="text" name="name" placeholder="name">
+            <br>
+            <input type="text" name="age" placeholder="age">
+            <br>
+            <button type="submit">Add</button>
+        </form>
+    </fieldset>
+    <ul id="users-list"></ul>
+    <script>
+        const baseUrl = 'http://localhost:3001';
+
+        function getUsersList() {
+            const url = baseUrl + '/users';
+
+            return fetch(url)
+                .then(res => res.json());
+        }
+
+        function prinUsersList(users) {
+            const ul = document.querySelector('#users-list');
+            let tpl = '';
+
+            ul.innerHTML = tpl;
+
+            users.forEach(user => {
+                tpl += `
+                    <li>
+                        Name: ${user.name};
+                        <br>
+                        Age: ${user.age};
+                    </li>
+                `;
+            });
+
+            ul.innerHTML = tpl;
+        }
+
+        getUsersList().then(prinUsersList);
+
+        function createUser(newUser) {
+            const url = baseUrl + '/users';
+
+            return fetch(url, {
+                method: 'POST',
+                body: JSON.stringify(newUser),
+                headers: new Headers({
+                    'Content-Type': 'application/json'
+                })
+            }).then(res => res.json());
+        }
+
+        document.getElementById('new-user').addEventListener('submit', e => {
+            e.preventDefault();
+
+            const formValues = {};
+
+            for (let formElement of e.target) {
+                if (formElement.type === 'text') {
+                    const value = formElement.value.trim();
+                    formValues[formElement.name] = value;
+                    formElement.value = '';
+                }
+            }
+
+            createUser(formValues)
+                .then(getUsersList)
+                .then(prinUsersList);
+        });
+
+    </script>
+</body>
+</html>
