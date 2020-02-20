@@ -19,6 +19,7 @@
     <ul id="users-list"></ul>
     <script>
         const baseUrl = 'http://localhost:3001';
+        const ul = document.querySelector('#users-list');
 
         function getUsersList() {
             const url = baseUrl + '/users';
@@ -27,8 +28,27 @@
                 .then(res => res.json());
         }
 
+        function removeUser(id) {
+            const url = baseUrl + '/users/' + id;
+
+            return fetch(url, {
+                method: 'DELETE'
+            }).then(res => res.json());
+        }
+
+        ul.addEventListener('click', e => {
+            if (e.target.nodeName === 'BUTTON') {
+                const userId = e.target.getAttribute('data-id');
+
+                if (userId) {
+                    removeUser(userId)
+                        .then(getUsersList)
+                        .then(prinUsersList);
+                }
+            }
+        });
+
         function prinUsersList(users) {
-            const ul = document.querySelector('#users-list');
             let tpl = '';
 
             ul.innerHTML = tpl;
@@ -39,6 +59,9 @@
                         Name: ${user.name};
                         <br>
                         Age: ${user.age};
+                        <button data-id="${user.id}">
+                            remove
+                        </button>
                     </li>
                 `;
             });
